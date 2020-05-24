@@ -1,5 +1,7 @@
-import BezierDrawer from "./BezierDrawer.js";
+import CurveDrawer from "./CurveDrawer.js";
+import bezier from "./bezier";
 
-let canvas = document.querySelector('canvas');
-let bezier = new BezierDrawer(canvas, 2, 0.0005);
-bezier.start();
+let canvas = document.querySelector("canvas");
+
+let curveDrawer = new CurveDrawer(canvas, 3, 0.001, bezier);
+curveDrawer.start();
