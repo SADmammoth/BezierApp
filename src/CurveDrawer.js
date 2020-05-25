@@ -43,34 +43,54 @@ export default class CurveDrawer {
 
   start() {
     if (!this.setPointsMode) {
-      this.canvas.addEventListener("mousedown", () => {
+      this.mousedown = () => {
         event.stopImmediatePropagation();
         let { x, y } = this.getCoordinates(event.pageX, event.pageY);
         this.addAnchor(x, y);
         this.directorsCount++;
         this.isHolding = true;
-      });
-      this.canvas.addEventListener("mousemove", () => {
+      };
+
+      this.canvas.addEventListener("mousedown", this.mousedown);
+
+      this.mousemove = () => {
         let { x, y } = this.getCoordinates(event.pageX, event.pageY);
         this.setDirection(x, y);
-      });
-      this.canvas.addEventListener("mouseout", () => event.preventDefault());
-      this.canvas.addEventListener("mouseup", () => {
+      };
+
+      this.canvas.addEventListener("mousemove", this.mousemove);
+
+      this.mouseout = () => event.preventDefault();
+
+      this.canvas.addEventListener("mouseout", this.mouseout);
+
+      this.mouseup = () => {
         event.stopImmediatePropagation();
         let { x, y } = this.getCoordinates(event.pageX, event.pageY);
         this.endLine(x, y);
-      });
+      };
+
+      this.canvas.addEventListener("mouseup", this.mouseup);
     } else {
       let path = new Path2D();
-      this.canvas.addEventListener("mousedown", () => {
+      this.mousedown = () => {
         let { x, y } = this.getCoordinates(event.pageX, event.pageY);
 
         path.ellipse(x, y, this.lineWidth, this.lineWidth / 2, 0, 0, 360);
         this.context.stroke(path);
         this.lastDirectonLine = path;
         this.addAnchor(x, y);
-      });
+      };
+      this.canvas.addEventListener("mousedown", this.mousedown);
     }
+  }
+
+  remove() {
+    this.canvas.removeEventListener("mousedown", this.mousedown);
+    this.canvas.removeEventListener("mousemove", this.mousemove);
+    this.canvas.removeEventListener("mouseout", this.mouseout);
+    this.canvas.removeEventListener("mouseup", this.mouseup);
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   addAnchor(x, y) {
@@ -94,13 +114,11 @@ export default class CurveDrawer {
 
   draw() {
     if (this.lastDirectonLine) {
-      this.context.fillStyle = "#ffffff";
-      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.context.stroke(this.lastDirectonLine);
       this.savedLines.forEach((path) => {
         this.context.stroke(path);
       });
-      this.context.fillStyle = "#000000";
     }
     let points = [...this.anchors, ...this.directors];
 
@@ -138,9 +156,7 @@ export default class CurveDrawer {
   drawLine(x1, y1, x2, y2) {
     if (this.lastDirectonLine) {
       // this.context.save();
-      this.context.fillStyle = "#ffffff";
-      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      this.context.fillStyle = "#000000";
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.context.stroke(this.lastDirectonLine);
       // this.context.restore();
     }

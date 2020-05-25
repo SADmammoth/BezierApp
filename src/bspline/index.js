@@ -47,8 +47,7 @@ function bsplineBase(t, degree, points, knots) {
   return N[m];
 }
 
-function bspline(t, ...points) {
-  let degree = 2;
+function bsplineCustom(t, degree, ...points) {
   let knotLength = points.length + degree + 1;
   let knots = [0, 0, 0];
   let step = 2 / (knotLength - 5);
@@ -73,4 +72,10 @@ function bspline(t, ...points) {
   };
 }
 
+function bspline(t, ...points) {
+  return bsplineCustom(t, 2, ...points);
+}
+
 export default bspline;
+
+export { bsplineCustom };
