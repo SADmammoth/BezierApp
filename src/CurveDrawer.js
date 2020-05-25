@@ -1,9 +1,16 @@
 export default class CurveDrawer {
-  constructor(canvas, lineWidth, step, lineFunc) {
+  constructor(
+    canvas,
+    lineWidth,
+    step,
+    lineFunc,
+    setPointsMode = false,
+    hasDirectors = false
+  ) {
     this.anchorsCount = 0;
     this.directorsCount = 0;
-    this.anchors = [{}, {}];
-    this.directors = [{}, {}];
+    this.anchors = [];
+    this.directors = [];
     this.isHolding = false;
     this.lineWidth = lineWidth;
     this.step = step;
@@ -11,6 +18,9 @@ export default class CurveDrawer {
     this.context = canvas.getContext("2d");
     this.lastDirectonLine = null;
     this.lastLine = null;
+
+    this.setPointsMode = setPointsMode;
+    this.hasDirectors = hasDirectors;
 
     this.savedLines = [];
     this.lineFunc = lineFunc;
@@ -32,29 +42,41 @@ export default class CurveDrawer {
   }
 
   start() {
-    this.canvas.addEventListener("mousedown", () => {
-      event.stopImmediatePropagation();
-      let { x, y } = this.getCoordinates(event.pageX, event.pageY);
-      this.addAnchor(x, y);
-      this.directorsCount++;
-      this.isHolding = true;
-    });
-    this.canvas.addEventListener("mousemove", () => {
-      let { x, y } = this.getCoordinates(event.pageX, event.pageY);
-      this.setDirection(x, y);
-    });
-    this.canvas.addEventListener("mouseout", () => event.preventDefault());
-    this.canvas.addEventListener("mouseup", () => {
-      event.stopImmediatePropagation();
-      let { x, y } = this.getCoordinates(event.pageX, event.pageY);
-      this.endLine(x, y);
-    });
+    if (!this.setPointsMode) {
+      this.canvas.addEventListener("mousedown", () => {
+        event.stopImmediatePropagation();
+        let { x, y } = this.getCoordinates(event.pageX, event.pageY);
+        this.addAnchor(x, y);
+        this.directorsCount++;
+        this.isHolding = true;
+      });
+      this.canvas.addEventListener("mousemove", () => {
+        let { x, y } = this.getCoordinates(event.pageX, event.pageY);
+        this.setDirection(x, y);
+      });
+      this.canvas.addEventListener("mouseout", () => event.preventDefault());
+      this.canvas.addEventListener("mouseup", () => {
+        event.stopImmediatePropagation();
+        let { x, y } = this.getCoordinates(event.pageX, event.pageY);
+        this.endLine(x, y);
+      });
+    } else {
+      let path = new Path2D();
+      this.canvas.addEventListener("mousedown", () => {
+        let { x, y } = this.getCoordinates(event.pageX, event.pageY);
+
+        path.ellipse(x, y, this.lineWidth, this.lineWidth / 2, 0, 0, 360);
+        this.context.stroke(path);
+        this.lastDirectonLine = path;
+        this.addAnchor(x, y);
+      });
+    }
   }
 
   addAnchor(x, y) {
     this.anchors[this.anchorsCount] = { x, y };
     this.anchorsCount++;
-    if (this.anchorsCount === 2) {
+    if (this.anchorsCount >= 2) {
       this.draw();
     }
   }
@@ -72,7 +94,6 @@ export default class CurveDrawer {
 
   draw() {
     if (this.lastDirectonLine) {
-      this.context.save();
       this.context.fillStyle = "#ffffff";
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.context.stroke(this.lastDirectonLine);
@@ -80,17 +101,27 @@ export default class CurveDrawer {
         this.context.stroke(path);
       });
       this.context.fillStyle = "#000000";
-      this.context.restore();
     }
+    let points = [...this.anchors, ...this.directors];
+
+    if (this.hasDirectors && this.setPointsMode) {
+      if (this.anchorsCount === 2) {
+        points = [this.anchors[0], this.anchors[2]];
+      } else if (this.anchorsCount === 3) {
+        points = [this.anchors[0], this.anchors[2], this.anchors[1]];
+      } else if (this.anchorsCount === 4) {
+        points = [
+          this.anchors[0],
+          this.anchors[3],
+          this.anchors[1],
+          this.anchors[2],
+        ];
+      }
+    }
+
     let path = new Path2D();
-    for (let t = 0; t <= 1; t += this.step) {
-      let XY = this.lineFunc(
-        t,
-        this.anchors[0],
-        this.anchors[1],
-        this.directors[0],
-        this.directors[1]
-      );
+    for (let t = 0; t <= 1; t += this.step / this.anchorsCount) {
+      let XY = this.lineFunc(t, ...points);
       if (t === 0) {
         path.ellipse(XY.x, XY.y, this.lineWidth * 2, this.lineWidth, 0, 0, 360);
       }
@@ -114,8 +145,8 @@ export default class CurveDrawer {
       // this.context.restore();
     }
     let path = new Path2D();
-    path.moveTo(x1, y1);
-    path.lineTo(x2, y2);
+    path.ellipse(x1, y1, this.lineWidth, this.lineWidth / 2, 0, 0, 360);
+    path.ellipse(x2, y2, this.lineWidth, this.lineWidth / 2, 0, 0, 360);
     path.closePath();
     this.context.stroke(path);
     this.lastDirectonLine = path;
@@ -134,12 +165,17 @@ export default class CurveDrawer {
     if (this.anchorsCount === 2) {
       this.anchorsCount = 1;
       this.directorsCount = 1;
-      this.anchors[0] = this.anchors[1];
-      this.anchors[1] = {};
-      let { x: ancX, y: ancY } = this.anchors[0];
-      let { x, y } = this.directors[1];
-      this.directors[0] = { x: 2 * ancX - x, y: 2 * ancY - y };
-      this.directors[1] = {};
+      if (!this.setPointsMode) {
+        this.anchors[0] = this.anchors[1];
+        this.anchors[1] = {};
+
+        let { x: ancX, y: ancY } = this.anchors[0];
+        let { x, y } = this.directors[1];
+        this.directors[0] = { x: 2 * ancX - x, y: 2 * ancY - y };
+        this.directors[1] = {};
+      } else {
+        this.anchors = [this.anchors[this.anchors.length - 1]];
+      }
     }
   }
 }
