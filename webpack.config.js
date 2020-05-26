@@ -19,14 +19,6 @@ module.exports = {
         },
       },
       {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      },
-      {
-        test: /\.(otf|png|gif)$/,
-        use: ['file-loader'],
-      },
-      {
         test: /\.(html)$/,
         use: [
           'html-loader'
