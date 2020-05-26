@@ -1,14 +1,22 @@
 function bezierTWO({ x: x1, y: y1 }, { x: x2, y: y2 }, t) {
+  function bezierTwo(p1, p2, t) {
+    return (1 - t) * p1 + t * p2;
+  }
+
   return {
-    x: (1 - t) * x1 + t * x2,
-    y: (1 - t) * y1 + t * y2,
+    x: bezierTwo(x1, x2, t),
+    y: bezierTwo(y1, y2, t),
   };
 }
 
 function bezierTHREE({ x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, t) {
+  function bezierThree(p1, p2, p3, t) {
+    return (1 - t) ** 2 * p1 + 2 * (1 - t) * t * p2 + t ** 2 * p3;
+  }
+
   return {
-    x: (1 - t) ** 2 * x1 + 2 * (1 - t) * t * x2 + t ** 2 * x3,
-    y: (1 - t) ** 2 * y1 + 2 * (1 - t) * t * y2 + t ** 2 * y3,
+    x: bezierThree(x1, x2, x3, t),
+    y: bezierThree(y1, y2, y3, t),
   };
 }
 
@@ -19,17 +27,18 @@ function bezierFOUR(
   { x: x4, y: y4 },
   t
 ) {
+  function bezierFour(p1, p2, p3, p4, t) {
+    return (
+      (1 - t) ** 3 * p1 +
+      3 * (1 - t) ** 2 * t * p2 +
+      3 * (1 - t) * t ** 2 * p3 +
+      t ** 3 * p4
+    );
+  }
+
   return {
-    x:
-      (1 - t) ** 3 * x1 +
-      3 * (1 - t) ** 2 * t * x2 +
-      3 * (1 - t) * t ** 2 * x3 +
-      t ** 3 * x4,
-    y:
-      (1 - t) ** 3 * y1 +
-      3 * (1 - t) ** 2 * t * y2 +
-      3 * (1 - t) * t ** 2 * y3 +
-      t ** 3 * y4,
+    x: bezierFour(x1, x2, x3, x4, t),
+    y: bezierFour(y1, y2, y3, y4, t),
   };
 }
 
