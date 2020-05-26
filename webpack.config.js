@@ -1,30 +1,39 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  entry: './src/index.js',
+  entry: "./src/index.js",
   output: {
-    filename: 'app.bundle.js',
-    path: __dirname + '/dist',
-    publicPath: '/',
+    filename: "app.bundle.js",
+    path: __dirname + "/dist",
+    publicPath: "/",
   },
-  devtool: 'source-map',
   module: {
     rules: [
-      { enforce: 'pre', test: /\.js$/, loader: 'eslint-loader' },
+      { enforce: "pre", test: /\.js$/, loader: "eslint-loader" },
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
         },
       },
       {
+        test: /\.(css)$/,
+        use: ["style-loader", "css-loader"],
+      },
+      {
         test: /\.(html)$/,
-        use: [
-          'html-loader'
-        ],
+        use: ["html-loader"],
+      },
+      {
+        test: /\.jpe?g$|\.gif$|\.png$/i,
+        use: "file-loader",
       },
     ],
   },
-  plugins: [new HtmlWebpackPlugin({ template: 'index.html' })],
-}
+  plugins: [
+    new CopyWebpackPlugin([{ from: "./assets", to: "./assets" }]),
+    new HtmlWebpackPlugin({ template: "index.html" }),
+  ],
+};

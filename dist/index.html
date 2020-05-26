@@ -4,14 +4,87 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
+    <script src="./src/index.js" type="module"></script>
+    <title>Curves drawer</title>
+    <style>
+      canvas {
+        height: 90vh;
+        width: 70vw;
+        position: absolute;
+        top: 50%;
+        left: 5vw;
+        transform: translateY(-50%);
+        border: 1px solid black;
+        background: url("./assets/grid.jpg");
+      }
+      .menu {
+        width: 15vw;
+        height: 90vh;
+        right: 5vw;
+        top: 50%;
+        position: absolute;
+        transform: translateY(-50%);
+        border: 1px solid black;
+        display: flex;
+        padding: 10px;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
   </head>
   <body style="margin: 0;">
-    <canvas
-      width="1000"
-      height="600"
-      style="border: 1px solid black; width: 1000; height: 600; margin: 5% 15%;"
-    ></canvas>
-    <script type="text/javascript" src="./app.bundle.js"></script>
-  </body>
+    <canvas width="2000" height="1000"></canvas>
+    <div class="menu">
+      <form>
+        <p class="text-center">Choose curve type</p>
+        <div class="checkbox-group">
+          <div class="custom-radio ml-4">
+            <input
+              class="custom-control-input"
+              id="bezier"
+              type="radio"
+              name="type"
+              value="bezier"
+            />
+            <label class="custom-control-label" for="bezier">Bezier</label>
+          </div>
+          <div class="custom-radio ml-4">
+            <input
+              class="custom-control-input"
+              id="bspline"
+              type="radio"
+              name="type"
+              value="bspline"
+            />
+            <label class="custom-control-label" for="bspline">B-spline</label>
+          </div>
+          <div class="custom-checkbox shows-on-bezier hidden m-4">
+            <input
+              class="custom-control-input"
+              id="bezierpoints"
+              type="checkbox"
+              name="bezierpoints"
+              value="true"
+            />
+            <label class="custom-control-label" for="bezierpoints"
+              >Points mode</label
+            >
+          </div>
+          <div class="shows-on-bspline hidden mt-4">
+            <label for="bsplinedegree">B-spline degree</label>
+            <input
+              style="width: 40px;"
+              id="bsplinedegree"
+              type="number"
+              name="bsplinedegree"
+              value="2"
+              min="2"
+              max="4"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  <script type="text/javascript" src="/app.bundle.js"></script></body>
 </html>
